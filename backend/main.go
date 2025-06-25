@@ -9,11 +9,11 @@ import (
 	"mime/multipart"
 	"net/http"
 	"strings"
-	// "github.com/unidoc/unipdf/v3/common/license"
-    // "github.com/unidoc/unipdf/v3/extractor"
-    // "github.com/unidoc/unipdf/v3/model"
+	"github.com/unidoc/unipdf/v3/common/license"
+    "github.com/unidoc/unipdf/v3/extractor"
+    "github.com/unidoc/unipdf/v3/model"
 	"github.com/gin-gonic/gin"
-	"github.com/ledongthuc/pdf"
+	// "github.com/ledongthuc/pdf"
 )
 
 func main() {
@@ -130,77 +130,77 @@ Return your analysis now.`
 	c.JSON(http.StatusOK, gin.H{"result": aiResponse})
 }
 
-// func extractTextFromFile(file multipart.File) (string, error) {
-//     var buf bytes.Buffer
-//     io.Copy(&buf, file)
-
-//     contentType := http.DetectContentType(buf.Bytes())
-//     if !strings.HasPrefix(contentType, "application/pdf") {
-//         // treat as plain text
-//         return buf.String(), nil
-//     }
-
-//     // 🔐 Step 1: Load Unidoc License Key
-//     err := license.SetMeteredKey("8658b8d10c3ff048539a94670bd23ffb421f70a9dd7e98f2350cb12323b144d5") // replace this!
-//     if err != nil {
-//         log.Println("License error:", err)
-//         return "", err
-//     }
-
-//     // 🔍 Step 2: Load and extract text
-//     reader := bytes.NewReader(buf.Bytes())
-//     pdfReader, err := model.NewPdfReader(reader)
-//     if err != nil {
-//         return "", err
-//     }
-
-//     var textBuilder strings.Builder
-//     numPages, err := pdfReader.GetNumPages()
-//     if err != nil {
-//         return "", err
-//     }
-
-//     for i := 1; i <= numPages; i++ {
-//         page, err := pdfReader.GetPage(i)
-//         if err != nil {
-//             continue
-//         }
-//         ext, err := extractor.New(page)
-//         if err != nil {
-//             continue
-//         }
-//         text, err := ext.ExtractText()
-//         if err == nil {
-//             textBuilder.WriteString(text + "\n")
-//         }
-//     }
-
-//     return textBuilder.String(), nil
-// }
-
 func extractTextFromFile(file multipart.File) (string, error) {
-	var buf bytes.Buffer
-	io.Copy(&buf, file)
+    var buf bytes.Buffer
+    io.Copy(&buf, file)
 
-	// Check if it's a PDF (simplified way)
-	if strings.HasPrefix(http.DetectContentType(buf.Bytes()), "application/pdf") {
-		reader, err := pdf.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
-		if err != nil {
-			return "", err
-		}
-		var textBuilder strings.Builder
-		pages := reader.NumPage()
-		for i := 1; i <= pages; i++ {
-			page := reader.Page(i)
-			txt, _ := page.GetPlainText(nil)
-			textBuilder.WriteString(txt)
-		}
-		return textBuilder.String(), nil
-	}
+    contentType := http.DetectContentType(buf.Bytes())
+    if !strings.HasPrefix(contentType, "application/pdf") {
+        // treat as plain text
+        return buf.String(), nil
+    }
 
-	// Else treat as plain text
-	return buf.String(), nil
+    // 🔐 Step 1: Load Unidoc License Key
+    err := license.SetMeteredKey("Your License Key") // replace this!
+    if err != nil {
+        log.Println("License error:", err)
+        return "", err
+    }
+
+    // 🔍 Step 2: Load and extract text
+    reader := bytes.NewReader(buf.Bytes())
+    pdfReader, err := model.NewPdfReader(reader)
+    if err != nil {
+        return "", err
+    }
+
+    var textBuilder strings.Builder
+    numPages, err := pdfReader.GetNumPages()
+    if err != nil {
+        return "", err
+    }
+
+    for i := 1; i <= numPages; i++ {
+        page, err := pdfReader.GetPage(i)
+        if err != nil {
+            continue
+        }
+        ext, err := extractor.New(page)
+        if err != nil {
+            continue
+        }
+        text, err := ext.ExtractText()
+        if err == nil {
+            textBuilder.WriteString(text + "\n")
+        }
+    }
+
+    return textBuilder.String(), nil
 }
+
+// func extractTextFromFile(file multipart.File) (string, error) {
+// 	var buf bytes.Buffer
+// 	io.Copy(&buf, file)
+
+// 	// Check if it's a PDF (simplified way)
+// 	if strings.HasPrefix(http.DetectContentType(buf.Bytes()), "application/pdf") {
+// 		reader, err := pdf.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
+// 		if err != nil {
+// 			return "", err
+// 		}
+// 		var textBuilder strings.Builder
+// 		pages := reader.NumPage()
+// 		for i := 1; i <= pages; i++ {
+// 			page := reader.Page(i)
+// 			txt, _ := page.GetPlainText(nil)
+// 			textBuilder.WriteString(txt)
+// 		}
+// 		return textBuilder.String(), nil
+// 	}
+
+// 	// Else treat as plain text
+// 	return buf.String(), nil
+// }
 
 // Call Ollama locally
 func callOllama(prompt string) (string, error) {
