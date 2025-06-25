@@ -1,0 +1,14 @@
+# Node.js (frontend)
+frontend/node_modules
+frontend/.next
+frontend/.env.local
+
+# Go (backend)
+backend/bin/
+backend/*.exe
+backend/*.out
+backend/.env
+
+# General
+.DS_Store
+.env
